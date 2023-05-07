@@ -1,18 +1,11 @@
-#include "gps.h"
+#include "nmea0183_parse.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include "USART1.h"
 
-/**
-  * @brief »ñµÃbufÖĞµÚCommaNumber¸ö¶ººÅµÄµØÖ·ÓëbufÊ×µØÖ·µÄÆ«ÒÆÁ¿
-  * @param *buf:ĞèÒª¼ìË÷µÄ×Ö·û´®Ö¸Õë
-	* @param CommaNumber:ĞèÒª¼ìË÷µÚ¼¸¸ö¶ººÅµÄÆ«ÒÆÁ¿
-  * @retval 0~0xfe,Ëù¼ìË÷¶ººÅµÄµØÖ·ÓëbufÊ×µØÖ·µÄÆ«ÒÆÁ¿;0xff²»´æÔÚËùÒª¼ìË÷µÄ¶ººÅ
-	*/
-u8 NMEA0183_CommaAddrOffset(u8 *buf,u8 CommaNumber){	 		    
-	u8 *p = buf;
+unsigned char NMEA0183_CommaAddrOffset(unsigned char *buf,unsigned char CommaNumber){	 		    
+	unsigned char *p = buf;
 	while(CommaNumber){		 
 		if(*buf=='*'||*buf<' '||*buf>'z')return 0Xff;
 		if(*buf==',')CommaNumber--;
@@ -21,62 +14,41 @@ u8 NMEA0183_CommaAddrOffset(u8 *buf,u8 CommaNumber){
 	return buf-p;
 }
 
-/**
-  * @brief »ñµÃÏàÁÚÁ½¸ö¶ººÅÖ®¼äµÄ×Ö·û´®²¢×ª»»³ÉÕûĞÍ
-	* @param *headAddr:×Ö·û´®Ê×µØÖ·
-  * @retval Á½¶ººÅ¼äµÄÕûĞÍÊı¾İ
-	*/
-int GetIntBetweenTwoCommas(u8 *headAddr){
-	u8 Integer[10]="";																//´æ·ÅÕûÊıµÄ×Ö·û´®
-	u8 i=0;
-	while(*headAddr != ',' && *headAddr != '*'){	//Ã»ÓĞµ½ÏÂÒ»¸ö','»ò'*'
-		Integer[i++] = *headAddr;										//»ñÈ¡×Ö·ûĞÎ³É×Ö·û´®
-		headAddr++;																	//µØÖ·Æ«ÒÆ
+int GetIntBetweenTwoCommas(unsigned char *headAddr){
+	unsigned char Integer[10]="";																//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+	unsigned char i=0;
+	while(*headAddr != ',' && *headAddr != '*'){
+		Integer[i++] = *headAddr;
+		headAddr++;
 	}
-	return atoi((const char *)Integer);						//×Ö·û´®×ªÕûĞÍ
+	return atoi((const char *)Integer);
 }
 
-/**
-  * @brief »ñµÃÏàÁÚÁ½¸ö¶ººÅÖ®¼äµÄ×Ö·û´®²¢×ª»»³É¸¡µãĞÍ
-	* @param *headAddr:×Ö·û´®Ê×µØÖ·
-  * @retval Á½¶ººÅ¼äµÄ¸¡µãĞÍÊı¾İ
-	*/
-float GetFloatBetweenTwoCommas(u8 *headAddr){
-	u8 Decimal[15]="";																//´æ·ÅÕûÊıµÄ×Ö·û´®
-	u8 i=0;
-	while(*headAddr != ',' && *headAddr != '*'){	//Ã»ÓĞµ½ÏÂÒ»¸ö','»ò'*'
-		Decimal[i++] = *headAddr;										//»ñÈ¡×Ö·ûĞÎ³É×Ö·û´®
-		headAddr++;																	//µØÖ·Æ«ÒÆ
+float GetFloatBetweenTwoCommas(unsigned char *headAddr){
+	unsigned char Decimal[15]="";																//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+	unsigned char i=0;
+	while(*headAddr != ',' && *headAddr != '*'){
+		Decimal[i++] = *headAddr;
+		headAddr++;
 	}
-	return atof((const char *)Decimal);						//×Ö·û´®×ª¸¡µãĞÍ
+	return atof((const char *)Decimal);
 }
 
-/**
-  * @brief »ñµÃÏàÁÚÁ½¸ö¶ººÅÖ®¼äµÄ×Ö·û´®²¢×ª»»³ÉË«¾«¶È¸¡µãĞÍ
-	* @param *headAddr:×Ö·û´®Ê×µØÖ·
-  * @retval Á½¶ººÅ¼äµÄË«¾«¶È¸¡µãĞÍÊı¾İ
-	*/
-double GetDoubleBetweenTwoCommas(u8 *headAddr){
-	u8 Decimal[15]="";																//´æ·ÅÕûÊıµÄ×Ö·û´®
-	u8 i=0;
-	while(*headAddr != ',' && *headAddr != '*'){	//Ã»ÓĞµ½ÏÂÒ»¸ö','»ò'*'
-		Decimal[i++] = *headAddr;										//»ñÈ¡×Ö·ûĞÎ³É×Ö·û´®
-		headAddr++;																	//µØÖ·Æ«ÒÆ
+double GetDoubleBetweenTwoCommas(unsigned char *headAddr){
+	unsigned char Decimal[15]="";																//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+	unsigned char i=0;
+	while(*headAddr != ',' && *headAddr != '*'){
+		Decimal[i++] = *headAddr;
+		headAddr++;
 	}
-	return atof((const char *)Decimal);						//×Ö·û´®×ª¸¡µãĞÍ
+	return atof((const char *)Decimal);
 }
 
-/**
-  * @brief ÕûÀíNMEA0183¸ñÊ½µÄUTC×Ö·û´®
-	* @param mode:Ä£Ê½Ñ¡Ôñ,1=·µ»ØĞ¡Ê±,2=·µ»Ø·ÖÖÓ,3=·µ»ØÃëÖÓ
-	* @param *headAddr:×Ö·û´®Ê×µØÖ·
-  * @retval ¸ù¾İmode·µ»ØÏàÓ¦µÄÊı¾İ
-	*/
-u8 GetUTCTime(u8 mode,u8 *headAddr){
-	u8 UTCHourStr[2]="";
-	u8 UTCMinStr[2]="";
-	u8 UTCSecStr[2]="";
-	u8 i=0,j=0,k=0;
+unsigned char GetUTCTime(unsigned char mode,unsigned char *headAddr){
+	unsigned char UTCHourStr[2]="";
+	unsigned char UTCMinStr[2]="";
+	unsigned char UTCSecStr[2]="";
+	unsigned char i=0,j=0,k=0;
 	while(*headAddr != '.'){
 		if(i<2){
 			UTCHourStr[i] = *headAddr;
@@ -91,24 +63,18 @@ u8 GetUTCTime(u8 mode,u8 *headAddr){
 		i++;
 	}
 	switch(mode){
-		case 1:return (u8)atoi((const char *)UTCHourStr);
-		case 2:return (u8)atoi((const char *)UTCMinStr);
-		case 3:return (u8)atoi((const char *)UTCSecStr);
+		case 1:return (unsigned char)atoi((const char *)UTCHourStr);
+		case 2:return (unsigned char)atoi((const char *)UTCMinStr);
+		case 3:return (unsigned char)atoi((const char *)UTCSecStr);
 		default:return 0;
 	}
 }
 
-/**
-  * @brief ÕûÀíNMEA0183¸ñÊ½µÄUTC×Ö·û´®
-	* @param mode:Ä£Ê½Ñ¡Ôñ,1=·µ»ØÄê·İ,2=·µ»ØÔÂ·İ,3=·µ»ØÈÕÆÚ
-	* @param *headAddr:×Ö·û´®Ê×µØÖ·
-  * @retval ¸ù¾İmode·µ»ØÏàÓ¦µÄÊı¾İ
-	*/
-u8 GetUTCDate(u8 mode,u8 *headAddr){
-	u8 UTCYearStr[2]="";
-	u8 UTCMouthStr[2]="";
-	u8 UTCDayStr[2]="";
-	u8 i=0,j=0,k=0;
+unsigned char GetUTCDate(unsigned char mode,unsigned char *headAddr){
+	unsigned char UTCYearStr[2]="";
+	unsigned char UTCMouthStr[2]="";
+	unsigned char UTCDayStr[2]="";
+	unsigned char i=0,j=0,k=0;
 	while(*headAddr != ','){
 		if(i<2){
 			UTCDayStr[i] = *headAddr;
@@ -123,29 +89,23 @@ u8 GetUTCDate(u8 mode,u8 *headAddr){
 		i++;
 	}
 	switch(mode){
-		case 1:return (u8)atoi((const char *)UTCYearStr);
-		case 2:return (u8)atoi((const char *)UTCMouthStr);
-		case 3:return (u8)atoi((const char *)UTCDayStr);
+		case 1:return (unsigned char)atoi((const char *)UTCYearStr);
+		case 2:return (unsigned char)atoi((const char *)UTCMouthStr);
+		case 3:return (unsigned char)atoi((const char *)UTCDayStr);
 		default:return 0;
 	}
 }
 
-/**
-  * @brief ½âÎöBDGSV±¨ÎÄ
-	* @param *BDGSV_Info:´æ´¢BDGSVÊı¾İµÄ½á¹¹ÌåÖ¸Õë
-	* @param *buf:´æ·ÅNMEA0183±¨ÎÄµÄ»º´æÇøÖ¸Õë
-  * @retval None
-	*/
 void NMEA0183_BDGSV_Analysis(BDGSV *BDGSV_Info,char *buf){
-	u8 *p;
-	u8 offset=0;
-	u8 i = 0,j = 0;
-	p = (u8 *)strstr((const char *)buf,"$BDGSV");	//ÔÚNMEA0183±¨ÎÄÀïÑ°ÕÒ"$BDGSV"²¢·µ»ØÆäµØÖ·
-	BDGSV_Info->BDGSV_Number = p[7] - '0';				//»ñµÃ×ÜµÄBDGSV±¨ÎÄÊı
+	unsigned char *p;
+	unsigned char offset=0;
+	unsigned char i = 0,j = 0;
+	p = (unsigned char *)strstr((const char *)buf,"$BDGSV");
+	BDGSV_Info->BDGSV_Number = p[7] - '0';
 	offset = NMEA0183_CommaAddrOffset(p,3);
 	if(offset != 0xff) BDGSV_Info->BD_SAT_Number = GetIntBetweenTwoCommas(p+offset);
 	for(i=0;i<BDGSV_Info->BDGSV_Number;i++){
-		for(j=0;j<4;j++){		//Ã¿ÌõBDGSV±¨ÎÄ×î¶à°üº¬ËÄ¿ÅÎÀĞÇµÄÊı¾İ(ÎÀĞÇ±àºÅ¡¢Ñö½Ç¡¢·½Î»½Ç¡¢ĞÅÔë±È)
+		for(j=0;j<4;j++){
 			offset = NMEA0183_CommaAddrOffset(p,4+j*4);
 			if(offset != 0xff) BDGSV_Info->BD_SAT_Status[j+i*4].SAT_ID = GetIntBetweenTwoCommas(p+offset);
 			offset = NMEA0183_CommaAddrOffset(p,5+j*4);
@@ -155,26 +115,20 @@ void NMEA0183_BDGSV_Analysis(BDGSV *BDGSV_Info,char *buf){
 			offset = NMEA0183_CommaAddrOffset(p,7+j*4);
 			if(offset != 0xff) BDGSV_Info->BD_SAT_Status[j+i*4].SAT_CNo = GetIntBetweenTwoCommas(p+offset);
 		}
-		p = (u8 *)strstr((const char *)p,"\n")+1;		//½«pÖ¸ÏòÏÂÒ»¸ö"$BDGSV"µÄÊ×µØÖ·
+		p = (unsigned char *)strstr((const char *)p,"\n")+1;
 	}
 }
 
-/**
-  * @brief ½âÎöGPGSV±¨ÎÄ
-	* @param *GPGSV_Info:´æ´¢GPGSVÊı¾İµÄ½á¹¹ÌåÖ¸Õë
-	* @param *buf:´æ·ÅNMEA0183±¨ÎÄµÄ»º´æÇøÖ¸Õë
-  * @retval None
-	*/
 void NMEA0183_GPGSV_Analysis(GPGSV *GPGSV_Info,char *buf){
-	u8 *p;
-	u8 offset=0;
-	u8 i = 0,j = 0;
-	p = (u8 *)strstr((const char *)buf,"$GPGSV");	//ÔÚNMEA0183±¨ÎÄÀïÑ°ÕÒ"$GPGSV"²¢·µ»ØÆäµØÖ·
-	GPGSV_Info->GPGSV_Number = p[7] - '0';				//»ñµÃ×ÜµÄGPGSV±¨ÎÄÊı
+	unsigned char *p;
+	unsigned char offset=0;
+	unsigned char i = 0,j = 0;
+	p = (unsigned char *)strstr((const char *)buf,"$GPGSV");
+	GPGSV_Info->GPGSV_Number = p[7] - '0';
 	offset = NMEA0183_CommaAddrOffset(p,3);
 	if(offset != 0xff) GPGSV_Info->GPS_SAT_Number = GetIntBetweenTwoCommas(p+offset);
 	for(i=0;i<GPGSV_Info->GPGSV_Number;i++){
-		for(j=0;j<4;j++){		//Ã¿ÌõGPGSV±¨ÎÄ×î¶à°üº¬ËÄ¿ÅÎÀĞÇµÄÊı¾İ(ÎÀĞÇ±àºÅ¡¢Ñö½Ç¡¢·½Î»½Ç¡¢ĞÅÔë±È)
+		for(j=0;j<4;j++){
 			offset = NMEA0183_CommaAddrOffset(p,4+j*4);
 			if(offset != 0xff) GPGSV_Info->GPS_SAT_Status[j+i*4].SAT_ID = GetIntBetweenTwoCommas(p+offset);
 			offset = NMEA0183_CommaAddrOffset(p,5+j*4);
@@ -184,20 +138,14 @@ void NMEA0183_GPGSV_Analysis(GPGSV *GPGSV_Info,char *buf){
 			offset = NMEA0183_CommaAddrOffset(p,7+j*4);
 			if(offset != 0xff) GPGSV_Info->GPS_SAT_Status[j+i*4].SAT_CNo = GetIntBetweenTwoCommas(p+offset);
 		}
-		p = (u8 *)strstr((const char *)p,"\n")+1;		//½«pÖ¸ÏòÏÂÒ»¸ö"$GPGSV"µÄÊ×µØÖ·
+		p = (unsigned char *)strstr((const char *)p,"\n")+1;
 	}
 }
 
-/**
-  * @brief ½âÎöGNGGA±¨ÎÄ
-	* @param *GNGGA_Info:´æ´¢GNGGAÊı¾İµÄ½á¹¹ÌåÖ¸Õë
-	* @param *buf:´æ·ÅNMEA0183±¨ÎÄµÄ»º´æÇøÖ¸Õë
-  * @retval None
-	*/
 void NMEA0183_GNGGA_Analusis(GNGGA *GNGGA_Info,char *buf){
-	u8 *p;
-	u8 offset=0;
-	p = (u8 *)strstr((const char *)buf,"$GNGGA");	//ÔÚNMEA0183±¨ÎÄÀïÑ°ÕÒ"$GNGGA"²¢·µ»ØÆäµØÖ·
+	unsigned char *p;
+	unsigned char offset=0;
+	p = (unsigned char *)strstr((const char *)buf,"$GNGGA");
 	offset = NMEA0183_CommaAddrOffset(p,1);
 	if(offset != 0xff){
 		GNGGA_Info->Time.Hour = GetUTCTime(1,p+offset);
@@ -226,20 +174,13 @@ void NMEA0183_GNGGA_Analusis(GNGGA *GNGGA_Info,char *buf){
 	if(offset != 0xff) GNGGA_Info->GeoAlti = GetFloatBetweenTwoCommas(p+offset);
 	offset = NMEA0183_CommaAddrOffset(p,12);
 	if(offset != 0xff) GNGGA_Info->GeoAltiUnit = *(p+offset);
-	//UART1_Put_String((unsigned char *)p+offset);
 }
 
-/**
-  * @brief ½âÎöBDGSA±¨ÎÄ
-	* @param *BDGSA_Info:´æ´¢BDGSAÊı¾İµÄ½á¹¹ÌåÖ¸Õë
-	* @param *buf:´æ·ÅNMEA0183±¨ÎÄµÄ»º´æÇøÖ¸Õë
-  * @retval None
-	*/
 void NMEA0183_BDGSA_Analusis(BDGSA *BDGSA_Info,char *buf){
-	u8 *p;
-	u8 offset=0;
-	u8 i;
-	p = (u8 *)strstr((const char *)buf,"$BDGSA");	//ÔÚNMEA0183±¨ÎÄÀïÑ°ÕÒ"$BDGSA"²¢·µ»ØÆäµØÖ·
+	unsigned char *p;
+	unsigned char offset=0;
+	unsigned char i;
+	p = (unsigned char *)strstr((const char *)buf,"$BDGSA");
 	offset = NMEA0183_CommaAddrOffset(p,1);
 	if(offset != 0xff) BDGSA_Info->MODE2 = *(p+offset);
 	offset = NMEA0183_CommaAddrOffset(p,2);
@@ -256,17 +197,11 @@ void NMEA0183_BDGSA_Analusis(BDGSA *BDGSA_Info,char *buf){
 	if(offset != 0xff) BDGSA_Info->VDOP = GetFloatBetweenTwoCommas(p+offset);
 }
 
-/**
-  * @brief ½âÎöGPGSA±¨ÎÄ
-	* @param *GPGSA_Info:´æ´¢GPGSAÊı¾İµÄ½á¹¹ÌåÖ¸Õë
-	* @param *buf:´æ·ÅNMEA0183±¨ÎÄµÄ»º´æÇøÖ¸Õë
-  * @retval None
-	*/
 void NMEA0183_GPGSA_Analusis(GPGSA *GPGSA_Info,char *buf){
-	u8 *p;
-	u8 offset=0;
-	u8 i;
-	p = (u8 *)strstr((const char *)buf,"$GPGSA");	//ÔÚNMEA0183±¨ÎÄÀïÑ°ÕÒ"$BDGSA"²¢·µ»ØÆäµØÖ·
+	unsigned char *p;
+	unsigned char offset=0;
+	unsigned char i;
+	p = (unsigned char *)strstr((const char *)buf,"$GPGSA");
 	offset = NMEA0183_CommaAddrOffset(p,1);
 	if(offset != 0xff) GPGSA_Info->MODE2 = *(p+offset);
 	offset = NMEA0183_CommaAddrOffset(p,2);
@@ -283,16 +218,10 @@ void NMEA0183_GPGSA_Analusis(GPGSA *GPGSA_Info,char *buf){
 	if(offset != 0xff) GPGSA_Info->VDOP = GetFloatBetweenTwoCommas(p+offset);
 }
 
-/**
-  * @brief ½âÎöGNRMC±¨ÎÄ
-	* @param *GNRMC_Info:´æ´¢GNRMCÊı¾İµÄ½á¹¹ÌåÖ¸Õë
-	* @param *buf:´æ·ÅNMEA0183±¨ÎÄµÄ»º´æÇøÖ¸Õë
-  * @retval None
-	*/
 void NMEA0183_GNRMC_Analusis(GNRMC *GNRMC_Info,char *buf){
-	u8 *p;
-	u8 offset=0;
-	p = (u8 *)strstr((const char *)buf,"$GNRMC");	//ÔÚNMEA0183±¨ÎÄÀïÑ°ÕÒ"$GNRMC"²¢·µ»ØÆäµØÖ·
+	unsigned char *p;
+	unsigned char offset=0;
+	p = (unsigned char *)strstr((const char *)buf,"$GNRMC");
 	offset = NMEA0183_CommaAddrOffset(p,1);
 	if(offset != 0xff){
 		GNRMC_Info->Time.Hour = GetUTCTime(1,p+offset);
@@ -327,16 +256,10 @@ void NMEA0183_GNRMC_Analusis(GNRMC *GNRMC_Info,char *buf){
 	if(offset != 0xff) GNRMC_Info->ModeIndi = *(p+offset);
 }
 
-/**
-  * @brief ½âÎöGNVTG±¨ÎÄ
-	* @param *GNVTG_Info:´æ´¢GNVTGÊı¾İµÄ½á¹¹ÌåÖ¸Õë
-	* @param *buf:´æ·ÅNMEA0183±¨ÎÄµÄ»º´æÇøÖ¸Õë
-  * @retval None
-	*/
 void NMEA0183_GNVTG_Analusis(GNVTG *GNVTG_Info,char *buf){
-	u8 *p;
-	u8 offset=0;
-	p = (u8 *)strstr((const char *)buf,"$GNVTG");	//ÔÚNMEA0183±¨ÎÄÀïÑ°ÕÒ"$GNRMC"²¢·µ»ØÆäµØÖ·
+	unsigned char *p;
+	unsigned char offset=0;
+	p = (unsigned char *)strstr((const char *)buf,"$GNVTG");
 	offset = NMEA0183_CommaAddrOffset(p,1);
 	if(offset != 0xff) GNVTG_Info->TrueNCour = GetFloatBetweenTwoCommas(p+offset);
 	offset = NMEA0183_CommaAddrOffset(p,3);

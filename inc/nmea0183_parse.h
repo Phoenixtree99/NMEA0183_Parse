@@ -1,97 +1,96 @@
-#ifndef __GPS_H
-#define __GPS_H
-#include "stm32f4xx.h"
+#ifndef __NMEA0183_PARSE_H
+#define __NMEA0183_PARSE_H
 
 typedef struct{
-	u8 SAT_ID;								//ÎÀÐÇ±àºÅ(01~32)[%d]
-	u8 SAT_Elevation;					//ÎÀÐÇÑö½Ç(0~90¡ã)[%d]
-	u16 SAT_Azimuth;					//ÎÀÐÇ·½Î»½Ç(0~360¡ã)[%d]
-	u8 SAT_CNo;								//ÐÅÔë±È(0~99dB)[%d]
+	unsigned char SAT_ID;								//ï¿½ï¿½ï¿½Ç±ï¿½ï¿½(01~32)[%d]
+	unsigned char SAT_Elevation;					//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(0~90ï¿½ï¿½)[%d]
+	unsigned short SAT_Azimuth;					//ï¿½ï¿½ï¿½Ç·ï¿½Î»ï¿½ï¿½(0~360ï¿½ï¿½)[%d]
+	unsigned char SAT_CNo;								//ï¿½ï¿½ï¿½ï¿½ï¿½(0~99dB)[%d]
 }GSV;
 
 typedef struct{
-	u8 BDGSV_Number;					//×ÜµÄGSVÓï¾ä±¨ÎÄÊý[%d]
-	u8 BD_SAT_Number;					//¿ÉÊÓBDÎÀÐÇ×ÜÊý(0~12)[%d]
-	GSV BD_SAT_Status[12];		//´æ·Å×î¶à12¿Å±±¶·ÎÀÐÇµÄ×´Ì¬[%d]
+	unsigned char BDGSV_Number;					//ï¿½Üµï¿½GSVï¿½ï¿½ä±¨ï¿½ï¿½ï¿½ï¿½[%d]
+	unsigned char BD_SAT_Number;					//ï¿½ï¿½ï¿½ï¿½BDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(0~12)[%d]
+	GSV BD_SAT_Status[12];		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½12ï¿½Å±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Çµï¿½×´Ì¬[%d]
 }BDGSV;
 
 typedef struct{
-	u8 GPGSV_Number;					//×ÜµÄGSVÓï¾ä±¨ÎÄÊý[%d]
-	u8 Current_GPGSV_Number;	//µ±Ç°µÄGSVÓï¾äºÅ[%d]
-	u8 GPS_SAT_Number;				//¿ÉÊÓGPSÎÀÐÇ×ÜÊý(0~12)[%d]
-	GSV GPS_SAT_Status[12];		//´æ·Å×î¶à12¿ÅGPSÎÀÐÇµÄ×´Ì¬[%d]
+	unsigned char GPGSV_Number;					//ï¿½Üµï¿½GSVï¿½ï¿½ä±¨ï¿½ï¿½ï¿½ï¿½[%d]
+	unsigned char Current_GPGSV_Number;	//ï¿½ï¿½Ç°ï¿½ï¿½GSVï¿½ï¿½ï¿½ï¿½[%d]
+	unsigned char GPS_SAT_Number;				//ï¿½ï¿½ï¿½ï¿½GPSï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(0~12)[%d]
+	GSV GPS_SAT_Status[12];		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½12ï¿½ï¿½GPSï¿½ï¿½ï¿½Çµï¿½×´Ì¬[%d]
 }GPGSV;
 
 typedef struct{
-	u16 Year;									//UTCÄê[%d]
-	u8 Month;									//UTCÔÂ[%d]
-	u8 Day;										//UTCÈÕ[%d]
-	u8 Hour;									//UTCÊ±[%d]
-	u8 Min;										//UTC·Ö[%d]
-	u8 Sec;										//UTCÃë[%d]
+	unsigned short Year;									//UTCï¿½ï¿½[%d]
+	unsigned char Month;									//UTCï¿½ï¿½[%d]
+	unsigned char Day;										//UTCï¿½ï¿½[%d]
+	unsigned char Hour;									//UTCÊ±[%d]
+	unsigned char Min;										//UTCï¿½ï¿½[%d]
+	unsigned char Sec;										//UTCï¿½ï¿½[%d]
 }UTC;
 
 typedef struct{
-	UTC Time;							//UTCÊ±¼ä(GGA±¨ÎÄ²»°üº¬ÈÕÆÚ)
-	double Lati;					//Î³¶È[%f]
-	u8 NorS;							//ÄÏ±±°ëÇò±êÖ¾:N=±±°ëÇò,S=ÄÏ°ëÇò,[%c]
-	double Longi;					//¾­¶È[%f]
-	u8 EorW;							//¶«Î÷°ëÇò±êÖ¾:E=¶«°ëÇò,W=Î÷°ëÇò[%c]
-	u8 PosiQual;					//¶¨Î»ÖÊÁ¿Ö¸Ê¾:0=¶¨Î»ÎÞÐ§,1=¶¨Î»ÓÐÐ§[%d]
-	u8 SATNum;						//ÕýÔÚÊ¹ÓÃ½âËãÎ»ÖÃµÄÎÀÐÇÊýÁ¿(0~12)[%d]
-	float HDOP;						//Ë®Æ½¾«È·¶È[%.1f]
-	float AntAlti;				//ÌìÏßÀëº£Æ½ÃæµÄ¸ß¶È[%.2f]
-	u8 AntAltiUnit;				//ÌìÏßÀëº£Æ½Ãæ¸ß¶Èµ¥Î»:MÃ×[%c]
-	float GeoAlti;				//´óµØÍÖÔ²ÃæÏà¶Ôº£Æ½ÃæµÄ¸ß¶È[%.2f]
-	u8 GeoAltiUnit;				//´óµØÍÖÔ²ÃæÏà¶Ôº£Æ½Ãæ¸ß¶Èµ¥Î»:MÃ×[%c]
+	UTC Time;							//UTCÊ±ï¿½ï¿½(GGAï¿½ï¿½ï¿½Ä²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+	double Lati;					//Î³ï¿½ï¿½[%f]
+	unsigned char NorS;							//ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾:N=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,S=ï¿½Ï°ï¿½ï¿½ï¿½,[%c]
+	double Longi;					//ï¿½ï¿½ï¿½ï¿½[%f]
+	unsigned char EorW;							//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾:E=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,W=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½[%c]
+	unsigned char PosiQual;					//ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½Ö¸Ê¾:0=ï¿½ï¿½Î»ï¿½ï¿½Ð§,1=ï¿½ï¿½Î»ï¿½ï¿½Ð§[%d]
+	unsigned char SATNum;						//ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ã½ï¿½ï¿½ï¿½Î»ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(0~12)[%d]
+	float HDOP;						//Ë®Æ½ï¿½ï¿½È·ï¿½ï¿½[%.1f]
+	float AntAlti;				//ï¿½ï¿½ï¿½ï¿½ï¿½ëº£Æ½ï¿½ï¿½Ä¸ß¶ï¿½[%.2f]
+	unsigned char AntAltiUnit;				//ï¿½ï¿½ï¿½ï¿½ï¿½ëº£Æ½ï¿½ï¿½ß¶Èµï¿½Î»:Mï¿½ï¿½[%c]
+	float GeoAlti;				//ï¿½ï¿½ï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½Ôºï¿½Æ½ï¿½ï¿½Ä¸ß¶ï¿½[%.2f]
+	unsigned char GeoAltiUnit;				//ï¿½ï¿½ï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½Ôºï¿½Æ½ï¿½ï¿½ß¶Èµï¿½Î»:Mï¿½ï¿½[%c]
 }GNGGA;
 
 typedef struct{
-	u8 MODE2;							//Ä£Ê½2:M=ÊÖ¶¯,A=×Ô¶¯[%c]
-	u8 MODE1;							//Ä£Ê½1:1=Î´¶¨Î»,2=¶þÎ¬¶¨Î»,3=ÈýÎ¬¶¨Î»[%d]
-	u16 SAT_PRN[12];			//12¸öÐÅµÀµÄÎÀÐÇPRNÂë[%d]
-	float PDOP;						//×ÛºÏÎ»ÖÃ¾«¶ÈÒò×Ó[%.1f]
-	float HDOP;						//Ë®Æ½¾«È·¶ÈÒò×Ó[%.1f]
-	float VDOP;						//´¹Ö±¾«È·¶ÈÒò×Ó[%.1f]
+	unsigned char MODE2;							//Ä£Ê½2:M=ï¿½Ö¶ï¿½,A=ï¿½Ô¶ï¿½[%c]
+	unsigned char MODE1;							//Ä£Ê½1:1=Î´ï¿½ï¿½Î»,2=ï¿½ï¿½Î¬ï¿½ï¿½Î»,3=ï¿½ï¿½Î¬ï¿½ï¿½Î»[%d]
+	unsigned char SAT_PRN[12];			//12ï¿½ï¿½ï¿½Åµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PRNï¿½ï¿½[%d]
+	float PDOP;						//ï¿½Ûºï¿½Î»ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½[%.1f]
+	float HDOP;						//Ë®Æ½ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½[%.1f]
+	float VDOP;						//ï¿½ï¿½Ö±ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½[%.1f]
 }BDGSA;
 
 typedef struct{
-	u8 MODE2;							//Ä£Ê½2:M=ÊÖ¶¯,A=×Ô¶¯
-	u8 MODE1;							//Ä£Ê½1:1=Î´¶¨Î»,2=¶þÎ¬¶¨Î»,3=ÈýÎ¬¶¨Î»
-	u16 SAT_PRN[12];			//12¸öÐÅµÀµÄÎÀÐÇPRNÂë
-	float PDOP;						//×ÛºÏÎ»ÖÃ¾«¶ÈÒò×Ó
-	float HDOP;						//Ë®Æ½¾«È·¶ÈÒò×Ó
-	float VDOP;						//´¹Ö±¾«È·¶ÈÒò×Ó
+	unsigned char MODE2;							//Ä£Ê½2:M=ï¿½Ö¶ï¿½,A=ï¿½Ô¶ï¿½
+	unsigned char MODE1;							//Ä£Ê½1:1=Î´ï¿½ï¿½Î»,2=ï¿½ï¿½Î¬ï¿½ï¿½Î»,3=ï¿½ï¿½Î¬ï¿½ï¿½Î»
+	unsigned short SAT_PRN[12];			//12ï¿½ï¿½ï¿½Åµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PRNï¿½ï¿½
+	float PDOP;						//ï¿½Ûºï¿½Î»ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	float HDOP;						//Ë®Æ½ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	float VDOP;						//ï¿½ï¿½Ö±ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }GPGSA;
 
 typedef struct{
-	UTC Time;							//UTCÊ±¼ä(RMC±¨ÎÄ°üº¬ÈÕÆÚ)
-	u8 PosStatus;					//¶¨Î»×´Ì¬:A=ÓÐÐ§¶¨Î»,V=ÎÞÐ§¶¨Î»[%c]
-	double Lati;						//Î³¶È[%f]
-	u8 NorS;							//ÄÏ±±°ëÇò±êÖ¾:N=±±°ëÇò,S=ÄÏ°ëÇò[%c]
-	double Longi;					//¾­¶È[%f]
-	u8 EorW;							//¶«Î÷°ëÇò±êÖ¾:E=¶«°ëÇò,W=Î÷°ëÇò[%c]
-	float SpeedKont;			//µØÃæËÙÂÊ(000.0~999.9½Ú)[%.2f]
-	float Course;					//µØÃæº½Ïò(000.0~359.9¡ã,ÒÔÕæ±±Îª²Î¿¼»ù×¼)[%.2f]
-	float MagVari;				//´ÅÆ«½Ç(000.0~180.0¡ã)[%.1f]
-	u8 Decl;							//´ÅÆ«½Ç·½Ïò:E=¶«/W=Î÷[%c]
-	u8 ModeIndi;					//Ä£Ê½Ö¸Ê¾:A=×ÔÖ÷¶¨Î»,D=²î·Ö,E=¹ÀËã,N=Êý¾ÝÎÞÐ§[%c]
+	UTC Time;							//UTCÊ±ï¿½ï¿½(RMCï¿½ï¿½ï¿½Ä°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+	unsigned char PosStatus;					//ï¿½ï¿½Î»×´Ì¬:A=ï¿½ï¿½Ð§ï¿½ï¿½Î»,V=ï¿½ï¿½Ð§ï¿½ï¿½Î»[%c]
+	double Lati;						//Î³ï¿½ï¿½[%f]
+	unsigned char NorS;							//ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾:N=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,S=ï¿½Ï°ï¿½ï¿½ï¿½[%c]
+	double Longi;					//ï¿½ï¿½ï¿½ï¿½[%f]
+	unsigned char EorW;							//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾:E=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,W=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½[%c]
+	float SpeedKont;			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(000.0~999.9ï¿½ï¿½)[%.2f]
+	float Course;					//ï¿½ï¿½ï¿½æº½ï¿½ï¿½(000.0~359.9ï¿½ï¿½,ï¿½ï¿½ï¿½æ±±Îªï¿½Î¿ï¿½ï¿½ï¿½×¼)[%.2f]
+	float MagVari;				//ï¿½ï¿½Æ«ï¿½ï¿½(000.0~180.0ï¿½ï¿½)[%.1f]
+	unsigned char Decl;							//ï¿½ï¿½Æ«ï¿½Ç·ï¿½ï¿½ï¿½:E=ï¿½ï¿½/W=ï¿½ï¿½[%c]
+	unsigned char ModeIndi;					//Ä£Ê½Ö¸Ê¾:A=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»,D=ï¿½ï¿½ï¿½,E=ï¿½ï¿½ï¿½ï¿½,N=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§[%c]
 }GNRMC;
 
 typedef struct{
-	float TrueNCour;			//µØÃæº½Ïò(000.0~359.9¡ã,ÒÔÕæ±±Îª²Î¿¼»ù×¼)[%.2f]
-	float MagNCour;				//µØÃæº½Ïò(000.0~359.9¡ã,ÒÔ´Å±±Îª²Î¿¼»ù×¼)[%.2f]
-	float SpeedKont;			//µØÃæËÙÂÊ(000.0~999.9½Ú)[%.2f]
-	float Speedkmps;			//µØÃæËÙÂÊ(000.0~1851.8¹«Àï/Ð¡Ê±)[%.2f]
-	u8 ModeIndi;					//Ä£Ê½Ö¸Ê¾:A=×ÔÖ÷¶¨Î»,D=²î·Ö,E=¹ÀËã,N=Êý¾ÝÎÞÐ§[%c]
+	float TrueNCour;			//ï¿½ï¿½ï¿½æº½ï¿½ï¿½(000.0~359.9ï¿½ï¿½,ï¿½ï¿½ï¿½æ±±Îªï¿½Î¿ï¿½ï¿½ï¿½×¼)[%.2f]
+	float MagNCour;				//ï¿½ï¿½ï¿½æº½ï¿½ï¿½(000.0~359.9ï¿½ï¿½,ï¿½Ô´Å±ï¿½Îªï¿½Î¿ï¿½ï¿½ï¿½×¼)[%.2f]
+	float SpeedKont;			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(000.0~999.9ï¿½ï¿½)[%.2f]
+	float Speedkmps;			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(000.0~1851.8ï¿½ï¿½ï¿½ï¿½/Ð¡Ê±)[%.2f]
+	unsigned char ModeIndi;					//Ä£Ê½Ö¸Ê¾:A=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»,D=ï¿½ï¿½ï¿½,E=ï¿½ï¿½ï¿½ï¿½,N=ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§[%c]
 }GNVTG;
 
-	u8 NMEA0183_CommaAddrOffset(u8 *buf,u8 CommaNumber);
-	int GetIntBetweenTwoCommas(u8 *headAddr);
-	float GetFloatBetweenTwoCommas(u8 *headAddr);
-	double GetDoubleBetweenTwoCommas(u8 *headAddr);
-	u8 GetUTCTime(u8 mode,u8 *headAddr);
-	u8 GetUTCDate(u8 mode,u8 *headAddr);
+	unsigned char NMEA0183_CommaAddrOffset(unsigned char *buf,unsigned char CommaNumber);
+	int GetIntBetweenTwoCommas(unsigned char *headAddr);
+	float GetFloatBetweenTwoCommas(unsigned char *headAddr);
+	double GetDoubleBetweenTwoCommas(unsigned char *headAddr);
+	unsigned char GetUTCTime(unsigned char mode,unsigned char *headAddr);
+	unsigned char GetUTCDate(unsigned char mode,unsigned char *headAddr);
 	void NMEA0183_BDGSV_Analysis(BDGSV *BDGSV_Info,char *buf);
 	void NMEA0183_GPGSV_Analysis(GPGSV *GPGSV_Info,char *buf);
 	void NMEA0183_GNGGA_Analusis(GNGGA *GNGGA_Info,char *buf);
